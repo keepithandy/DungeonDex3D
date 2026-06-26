@@ -22,9 +22,29 @@ That is the first mountain. Everything else comes after the mountain is real.
 
 ## Current Status
 
-This repo is currently an early project shell.
+This repo is currently an early project shell with a compressed source archive checked in as `dungeonDex-3D.tar.gz`.
 
-The next step is to choose and document the technical foundation, then build the smallest playable graybox slice before adding deep progression systems.
+The next step is to unpack and review that archive into normal source-controlled files, then choose whether the included scaffold becomes the official DungeonDex3D foundation.
+
+Until that archive is unpacked, the project should treat the README and issues as direction-setting docs rather than proof that the app can already run from the repo root.
+
+## Archive Adoption Plan
+
+The checked-in archive should not stay as the long-term development shape.
+
+Compressed archives are useful for transfer, but they are poor source control targets because GitHub cannot easily diff the app, review changes, search files, or track small fixes inside the bundle.
+
+Recommended next pass:
+
+1. Extract `dungeonDex-3D.tar.gz` locally.
+2. Inspect the extracted folder structure.
+3. Identify the runtime stack and package manager.
+4. Move the actual app source into the repo root or a clearly named app folder.
+5. Verify the app can install, run, and build.
+6. Update this README with real commands.
+7. Delete the archive only after the extracted source is committed and verified.
+
+Do not delete the archive before the extracted source is safely present in the repo.
 
 ## Design Principles
 
@@ -102,11 +122,11 @@ Future content should be shaped around readable data:
 - readable issue roadmap
 - clear MVP boundary
 
-## Recommended First Milestone: Playable Graybox Slice
+## Recommended First Milestone: Archive Extraction And Playable Graybox Slice
 
 A strong first milestone would be:
 
-> Open DungeonDex3D, move through one simple dungeon space, trigger one encounter, resolve it, receive feedback, and reset or save the state.
+> Extract the checked-in source archive, make the project run from normal repo files, then move through one simple dungeon space, trigger one encounter, resolve it, receive feedback, and reset or save the state.
 
 This milestone should avoid advanced graphics, large maps, complex classes, talent trees, procedural generation, networking, or heavy UI polish.
 
@@ -114,19 +134,21 @@ The point is to prove the spine before decorating the skeleton. Weirdly motivati
 
 ## Suggested Roadmap
 
-### Phase 0 — Foundation
+### Phase 0 — Archive Review And Foundation
 
-- Pick the technical stack.
-- Create the project structure.
+- Unpack `dungeonDex-3D.tar.gz`.
+- Review the extracted app structure.
+- Pick or confirm the technical stack.
+- Create the project structure from real source files.
 - Add run instructions.
 - Add a simple smoke checklist.
 - Define the MVP boundary.
 
 ### Phase 1 — 3D Movement Slice
 
-- Add a simple scene.
-- Add player movement.
-- Add camera behavior.
+- Add or verify a simple scene.
+- Add or verify player movement.
+- Add or verify camera behavior.
 - Add boundaries/collision.
 - Add one interactable target.
 
@@ -166,9 +188,9 @@ DungeonDex3D should not start with:
 
 ## Development Notes
 
-Run instructions are not defined yet.
+Run instructions are not defined yet because the real source is currently inside `dungeonDex-3D.tar.gz`.
 
-Once the technical foundation is chosen, this README should be updated with:
+Once the archive is extracted and the technical foundation is confirmed, this README should be updated with:
 
 ```bash
 # install command, if needed
@@ -182,12 +204,13 @@ If the project stays browser-first, keep setup friendly for Windows PowerShell a
 
 ## Issue Roadmap
 
-The first five major issues should define the backbone of the project:
+The first major issues should define the backbone of the project:
 
-1. Foundation and technical stack decision.
-2. First playable 3D graybox slice.
-3. Core encounter and interaction loop.
-4. DungeonDex-style content and progression model.
-5. Stability, testing, performance, and release guardrails.
+1. Archive extraction and source adoption.
+2. Foundation and technical stack decision.
+3. First playable 3D graybox slice.
+4. Core encounter and interaction loop.
+5. DungeonDex-style content and progression model.
+6. Stability, testing, performance, and release guardrails.
 
 These are intentionally large. Smaller implementation issues can be split out from them once the direction is locked.
