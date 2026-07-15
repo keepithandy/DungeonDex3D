@@ -36,6 +36,17 @@ function Menu() {
         <div style={{ fontSize: 18, color: "#8844cc", letterSpacing: 8 }}>
           FIRST PERSON
         </div>
+        <div
+          style={{
+            fontSize: 11,
+            color: "#aa88bb",
+            letterSpacing: 3,
+            marginTop: 10,
+            textTransform: "uppercase",
+          }}
+        >
+          v0.0.1-alpha prototype
+        </div>
       </div>
 
       <div
@@ -85,7 +96,9 @@ function Menu() {
       </div>
 
       <div style={{ fontSize: 12, color: "#555", textAlign: "center", lineHeight: 2 }}>
-        WASD to move &nbsp;&bull;&nbsp; MOUSE to look &nbsp;&bull;&nbsp; CLICK / F / SPACE to shoot
+        CLICK GAME to focus &nbsp;&bull;&nbsp; WASD to move &nbsp;&bull;&nbsp; MOUSE to look
+        <br />
+        ESC to release mouse &nbsp;&bull;&nbsp; CLICK / F / SPACE to shoot
       </div>
 
       <button
