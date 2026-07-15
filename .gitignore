@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Vite and TypeScript output
+dist/
+build/
+.tsbuildinfo
+*.tsbuildinfo
+
+# Local extraction and package-manager artifacts
+extracted-archive/
+.pnpm-store/
+.npm/
+
+# Local environment and editor files
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
