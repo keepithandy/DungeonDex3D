@@ -6,7 +6,7 @@ The goal is not to rebuild the entire DungeonDex system in 3D all at once. The g
 
 ## Current Status
 
-Phase 0 source adoption has landed on `main`.
+Phase 1 graybox verification is underway on `agent/phase1-graybox-smoke`, based on standalone-build restoration commit `5f39935`.
 
 The application was adopted from the `dungeonDex-3D.tar.gz` source archive into normal repository paths. The discovered app root was `artifacts/3d-game`, and the source now lives at the repository root.
 
@@ -32,6 +32,8 @@ pnpm run build
 pnpm run typecheck
 ```
 
+`pnpm-workspace.yaml` explicitly allows the checked-in `esbuild` package build required by Vite. This keeps the standalone install command valid with pnpm 11+, which uses `allowBuilds` instead of the retired `onlyBuiltDependencies` setting.
+
 Optional environment overrides are still supported:
 
 ```powershell
@@ -53,6 +55,12 @@ The source archive originally depended on a larger Replit/pnpm workspace. The st
 - Replit artifact commands that pointed at `artifacts/3d-game`
 
 The next local validation pass should run `pnpm install`, `pnpm run build`, and `pnpm run typecheck` from the repository root before merging the standalone-build branch.
+
+## Phase 1 Graybox Smoke
+
+After the commands above succeed, run `pnpm run dev`, open the local URL Vite prints, and follow [the graybox smoke checklist](docs/smoke-checklist.md). The current slice is a first-person room with keyboard movement, mouse look after clicking the canvas, visible enemy placeholders, and a portal objective after the active room is cleared.
+
+This is a manual runtime check only; it does not authorize new gameplay, progression, save, or content systems.
 
 ## Project Goal
 
