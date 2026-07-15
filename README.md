@@ -4,6 +4,49 @@ DungeonDex3D is an experimental 3D dungeon RPG prototype inspired by the broader
 
 The goal is not to rebuild the entire DungeonDex system in 3D all at once. The goal is to prove a small, readable, playable 3D foundation first: movement, camera clarity, one dungeon space, one encounter loop, basic reward feedback, and a safe path toward bigger systems later.
 
+## Current Status
+
+Phase 0 source adoption is in progress on `agent/adopt-source-archive`.
+
+The application has been adopted from the `dungeonDex-3D.tar.gz` source archive into normal repository paths. The discovered app root was `artifacts/3d-game`, and the source now lives at the repository root.
+
+The adopted stack is:
+
+- Vite
+- React
+- TypeScript
+- React Three Fiber / Three.js
+- Zustand
+- pnpm
+
+The app source is visible in `src/`, static assets are in `public/`, and the Vite entry point is `index.html`.
+
+## Commands Discovered In The Adopted Source
+
+The source archive identifies pnpm as its package manager and defines these scripts:
+
+```powershell
+pnpm install
+$env:PORT = "24982"
+$env:BASE_PATH = "/"
+pnpm run dev
+pnpm run build
+pnpm run typecheck
+```
+
+`PORT` and `BASE_PATH` are required by `vite.config.ts`; they apply to both `dev` and `build`.
+
+## Current Validation Status
+
+The adopted `package.json` is an incomplete extract of a larger Replit/pnpm workspace. `pnpm install` currently stops with `ERR_PNPM_CATALOG_ENTRY_NOT_FOUND_FOR_SPEC`, beginning with `@replit/vite-plugin-cartographer`, because the archive does not contain the workspace catalog.
+
+The TypeScript configuration also refers to missing parent-workspace files:
+
+- `../../tsconfig.base.json`
+- `../../lib/api-client-react`
+
+Because of those missing workspace pieces, the dev server, build, and typecheck are not green yet. The next patch should make the adopted app self-contained before any gameplay work starts.
+
 ## Project Goal
 
 Build a lightweight 3D dungeon crawler foundation that can eventually support DungeonDex-style progression, loot, combat, talents, enemies, and readable RPG feedback.
@@ -20,32 +63,6 @@ The first successful milestone should feel like a tiny playable slice:
 
 That is the first mountain. Everything else comes after the mountain is real.
 
-## Current Status
-
-This repo is currently an early project shell with a compressed source archive checked in as `dungeonDex-3D.tar.gz`.
-
-The next step is to unpack and review that archive into normal source-controlled files, then choose whether the included scaffold becomes the official DungeonDex3D foundation.
-
-Until that archive is unpacked, the project should treat the README and issues as direction-setting docs rather than proof that the app can already run from the repo root.
-
-## Archive Adoption Plan
-
-The checked-in archive should not stay as the long-term development shape.
-
-Compressed archives are useful for transfer, but they are poor source control targets because GitHub cannot easily diff the app, review changes, search files, or track small fixes inside the bundle.
-
-Recommended next pass:
-
-1. Extract `dungeonDex-3D.tar.gz` locally.
-2. Inspect the extracted folder structure.
-3. Identify the runtime stack and package manager.
-4. Move the actual app source into the repo root or a clearly named app folder.
-5. Verify the app can install, run, and build.
-6. Update this README with real commands.
-7. Delete the archive only after the extracted source is committed and verified.
-
-Do not delete the archive before the extracted source is safely present in the repo.
-
 ## Design Principles
 
 - Playable first, impressive later.
@@ -61,12 +78,13 @@ Do not delete the archive before the extracted source is safely present in the r
 
 ### 1. A stable app foundation
 
-The repo needs a clear runtime decision and project structure. Before building big features, the project should define whether it is using a browser-first stack, a game engine, or another setup.
+The repo needs clear runtime commands and a project structure that works outside the original archive/workspace.
 
 Important questions:
 
-- Is this a browser project, a desktop project, or an engine project?
+- What command installs dependencies?
 - What command runs it locally?
+- What command builds it?
 - Where does source code live?
 - Where do assets live?
 - How are future scenes, encounters, and data organized?
@@ -122,19 +140,17 @@ Future content should be shaped around readable data:
 - readable issue roadmap
 - clear MVP boundary
 
-## Recommended First Milestone: Archive Extraction And Playable Graybox Slice
+## Recommended Next Milestone: Standalone Build Restoration
 
-A strong first milestone would be:
+A strong next milestone would be:
 
-> Extract the checked-in source archive, make the project run from normal repo files, then move through one simple dungeon space, trigger one encounter, resolve it, receive feedback, and reset or save the state.
+> Make the adopted Vite/React/TypeScript app self-contained from the repository root, then get `pnpm install` and `pnpm run build` green.
 
-This milestone should avoid advanced graphics, large maps, complex classes, talent trees, procedural generation, networking, or heavy UI polish.
-
-The point is to prove the spine before decorating the skeleton. Weirdly motivational, but true.
+This milestone should avoid movement, combat, UI redesign, inventory, talents, progression, loot tables, procedural generation, or new gameplay.
 
 ## Suggested Roadmap
 
-### Phase 0 — Archive Review And Foundation
+### Phase 0 — Archive Review And Source Adoption
 
 - Unpack `dungeonDex-3D.tar.gz`.
 - Review the extracted app structure.
@@ -143,6 +159,16 @@ The point is to prove the spine before decorating the skeleton. Weirdly motivati
 - Add run instructions.
 - Add a simple smoke checklist.
 - Define the MVP boundary.
+
+### Phase 0.1 — Standalone Build Restoration
+
+- Replace missing pnpm catalog/workspace references.
+- Resolve `tsconfig.base.json`.
+- Resolve `lib/api-client-react` / `@workspace/api-client-react`.
+- Confirm Vite aliases work from the repository root.
+- Get `pnpm install` green.
+- Get `pnpm run build` green.
+- Update this README with verified standalone commands.
 
 ### Phase 1 — 3D Movement Slice
 
@@ -186,28 +212,12 @@ DungeonDex3D should not start with:
 - advanced animation pipelines before movement is stable
 - complex talent or inventory systems before the basic encounter loop exists
 
-## Development Notes
-
-Run instructions are not defined yet because the real source is currently inside `dungeonDex-3D.tar.gz`.
-
-Once the archive is extracted and the technical foundation is confirmed, this README should be updated with:
-
-```bash
-# install command, if needed
-
-# run command
-
-# build command, if needed
-```
-
-If the project stays browser-first, keep setup friendly for Windows PowerShell and avoid unnecessary tooling until the prototype needs it.
-
 ## Issue Roadmap
 
 The first major issues should define the backbone of the project:
 
 1. Archive extraction and source adoption.
-2. Foundation and technical stack decision.
+2. Standalone build restoration.
 3. First playable 3D graybox slice.
 4. Core encounter and interaction loop.
 5. DungeonDex-style content and progression model.
