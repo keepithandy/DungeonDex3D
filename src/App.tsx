@@ -1,6 +1,8 @@
+import { lazy, Suspense } from "react";
 import { useGameStore } from "./game/store";
-import { Game } from "./game/Game";
 import { RARITY_COLORS } from "./game/lootSystem";
+
+const Game = lazy(() => import("./game/Game").then(({ Game }) => ({ default: Game })));
 
 function Menu() {
   const startGame = useGameStore((s) => s.startGame);
@@ -31,7 +33,7 @@ function Menu() {
             marginBottom: 6,
           }}
         >
-          DUNGEON CRAWLER
+          DUNGEONDEX 3D
         </div>
         <div style={{ fontSize: 18, color: "#8844cc", letterSpacing: 8 }}>
           FIRST PERSON
@@ -45,7 +47,7 @@ function Menu() {
             textTransform: "uppercase",
           }}
         >
-          v0.0.1-alpha prototype
+          v0.0.1-alpha graybox prototype
         </div>
       </div>
 
@@ -63,11 +65,9 @@ function Menu() {
         }}
       >
         {([
-          ["🗡️", "Loot weapons & armor with rarity tiers"],
-          ["💀", "Monsters grow stronger each depth"],
-          ["⬆️", "Level up to boost health & power"],
-          ["🌀", "Find the portal to go deeper"],
-          ["👑", "Boss battles every 5 floors"],
+          ["◼", "First-person arena graybox"],
+          ["◼", "Clear the current room to activate the exit portal"],
+          ["◼", "Movement, camera, and HUD are under active prototype review"],
         ] as [string, string][]).map(([icon, text]) => (
           <div key={text} style={{ display: "flex", gap: 12, alignItems: "center", fontSize: 14, color: "#bbaadd" }}>
             <span style={{ fontSize: 18 }}>{icon}</span>
@@ -200,13 +200,38 @@ function DeathScreen() {
   );
 }
 
+function GameLoading() {
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        display: "grid",
+        placeItems: "center",
+        background: "#08000f",
+        color: "#cdaaff",
+        fontFamily: "'Courier New', monospace",
+        fontSize: 14,
+        letterSpacing: 2,
+        textTransform: "uppercase",
+      }}
+    >
+      Loading graybox…
+    </div>
+  );
+}
+
 export default function App() {
   const phase = useGameStore((s) => s.phase);
 
   return (
     <>
       {phase === "menu" && <Menu />}
-      {phase === "playing" && <Game />}
+      {phase === "playing" && (
+        <Suspense fallback={<GameLoading />}>
+          <Game />
+        </Suspense>
+      )}
       {phase === "dead" && <DeathScreen />}
     </>
   );

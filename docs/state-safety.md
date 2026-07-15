@@ -10,7 +10,7 @@ The first state should only track what the prototype needs:
 
 ```js
 {
-  version: "0.1.0-prototype",
+  version: "0.0.1-alpha",
   playerPosition: null,
   targetTriggered: false,
   lastMessage: ""
