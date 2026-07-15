@@ -6,7 +6,7 @@ The goal is not to rebuild the entire DungeonDex system in 3D all at once. The g
 
 ## Current Status
 
-Phase 1 graybox verification is underway on `agent/phase1-graybox-smoke`, based on standalone-build restoration commit `5f39935`.
+DungeonDex3D is currently a `v0.0.1-alpha` playable graybox prototype. The top-level Chrome baseline has been manually verified for menu launch, scene rendering, keyboard movement, mouse look, pointer-lock release with `ESC`, and HUD readability.
 
 The application was adopted from the `dungeonDex-3D.tar.gz` source archive into normal repository paths. The discovered app root was `artifacts/3d-game`, and the source now lives at the repository root.
 
@@ -61,6 +61,17 @@ The next local validation pass should run `pnpm install`, `pnpm run build`, and 
 After the commands above succeed, run `pnpm run dev`, open the local URL Vite prints, and follow [the graybox smoke checklist](docs/smoke-checklist.md). The current slice is a first-person room with keyboard movement, mouse look after clicking the canvas, visible enemy placeholders, and a portal objective after the active room is cleared.
 
 This is a manual runtime check only; it does not authorize new gameplay, progression, save, or content systems.
+
+### Alpha Controls
+
+- Select `ENTER DUNGEON` to start the current graybox.
+- Click inside the game area to focus the canvas and lock the mouse.
+- Use `WASD` or the arrow keys to move and the mouse to look.
+- Press `ESC` to release pointer lock.
+- Use click, `F`, or `Space` for the existing attack input.
+- If pointer lock is unavailable, the HUD reports it without stopping keyboard movement.
+
+Run camera, movement, and boundary checks in a top-level browser such as Chrome. Embedded browser frames may block pointer lock even when the standalone app is working normally.
 
 ## Project Goal
 

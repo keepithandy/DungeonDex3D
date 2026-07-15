@@ -1,9 +1,9 @@
 import { Canvas } from "@react-three/fiber";
-import { KeyboardControls, PointerLockControls } from "@react-three/drei";
-import { Suspense, useEffect } from "react";
+import { KeyboardControls } from "@react-three/drei";
+import { Suspense, useEffect, useState } from "react";
 import { useGameStore } from "./store";
 import { Arena } from "./Arena";
-import { Player, Controls } from "./Player";
+import { Player, Controls, type PointerLockStatus } from "./Player";
 import { Enemies } from "./Enemies";
 import { Bullets } from "./Bullets";
 import { LootItems } from "./LootItems";
@@ -24,7 +24,11 @@ function NotificationTicker() {
   return null;
 }
 
-function GameScene() {
+interface GameSceneProps {
+  onPointerLockStatusChange: (status: PointerLockStatus) => void;
+}
+
+function GameScene({ onPointerLockStatusChange }: GameSceneProps) {
   const depth = useGameStore((s) => s.depth);
   const setEnemies = useGameStore((s) => s.setEnemies);
   const setLoot = useGameStore((s) => s.setLoot);
@@ -40,7 +44,7 @@ function GameScene() {
       <ambientLight intensity={0.25} color="#334" />
       <directionalLight position={[5, 8, 5]} intensity={0.8} color="#aabbff" castShadow />
       <Arena />
-      <Player />
+      <Player onPointerLockStatusChange={onPointerLockStatusChange} />
       <Enemies />
       <Bullets />
       <LootItems />
@@ -51,6 +55,7 @@ function GameScene() {
 
 export function Game() {
   const phase = useGameStore((s) => s.phase);
+  const [pointerLockStatus, setPointerLockStatus] = useState<PointerLockStatus>("unlocked");
 
   if (phase !== "playing") return null;
 
@@ -64,12 +69,12 @@ export function Game() {
           style={{ width: "100%", height: "100%" }}
         >
           <Suspense fallback={null}>
-            <GameScene />
+            <GameScene onPointerLockStatusChange={setPointerLockStatus} />
           </Suspense>
         </Canvas>
       </KeyboardControls>
       <DeathLootSpawner />
-      <HUD />
+      <HUD pointerLockStatus={pointerLockStatus} />
     </div>
   );
 }

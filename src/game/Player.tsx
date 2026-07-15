@@ -16,7 +16,13 @@ enum Controls {
   right = "right",
 }
 
-export function Player() {
+export type PointerLockStatus = "unlocked" | "locked" | "error";
+
+interface PlayerProps {
+  onPointerLockStatusChange: (status: PointerLockStatus) => void;
+}
+
+export function Player({ onPointerLockStatusChange }: PlayerProps) {
   const { camera, gl } = useThree();
   const [, getKeys] = useKeyboardControls<Controls>();
   const updatePlayer = useGameStore((s) => s.updatePlayer);
@@ -32,6 +38,11 @@ export function Player() {
   useEffect(() => {
     const canvas = gl.domElement;
 
+    const reportPointerLockError = () => {
+      isPointerLocked.current = false;
+      onPointerLockStatusChange("error");
+    };
+
     const onMouseMove = (e: MouseEvent) => {
       if (!isPointerLocked.current) return;
       yaw.current -= e.movementX * MOUSE_SENSITIVITY;
@@ -39,28 +50,42 @@ export function Player() {
       pitch.current = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, pitch.current));
     };
 
-    const onClick = (e: MouseEvent) => {
+    const onClick = () => {
       if (!isPointerLocked.current) {
-        canvas.requestPointerLock();
+        if (typeof canvas.requestPointerLock !== "function") {
+          reportPointerLockError();
+          return;
+        }
+
+        try {
+          const lockRequest = canvas.requestPointerLock();
+          lockRequest?.catch(reportPointerLockError);
+        } catch {
+          reportPointerLockError();
+        }
         return;
       }
       tryShoot();
     };
 
     const onPointerLockChange = () => {
-      isPointerLocked.current = document.pointerLockElement === canvas;
+      const isLocked = document.pointerLockElement === canvas;
+      isPointerLocked.current = isLocked;
+      onPointerLockStatusChange(isLocked ? "locked" : "unlocked");
     };
 
     document.addEventListener("mousemove", onMouseMove);
     canvas.addEventListener("click", onClick);
     document.addEventListener("pointerlockchange", onPointerLockChange);
+    document.addEventListener("pointerlockerror", reportPointerLockError);
 
     return () => {
       document.removeEventListener("mousemove", onMouseMove);
       canvas.removeEventListener("click", onClick);
       document.removeEventListener("pointerlockchange", onPointerLockChange);
+      document.removeEventListener("pointerlockerror", reportPointerLockError);
     };
-  }, [gl]);
+  }, [gl, onPointerLockStatusChange]);
 
   const tryShoot = () => {
     const store = useGameStore.getState();

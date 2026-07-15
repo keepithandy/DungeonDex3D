@@ -1,7 +1,12 @@
 import { useGameStore } from "./store";
 import { RARITY_COLORS, rarityLabel } from "./lootSystem";
+import type { PointerLockStatus } from "./Player";
 
-export function HUD() {
+interface HUDProps {
+  pointerLockStatus: PointerLockStatus;
+}
+
+export function HUD({ pointerLockStatus }: HUDProps) {
   const player = useGameStore((s) => s.player);
   const depth = useGameStore((s) => s.depth);
   const enemies = useGameStore((s) => s.enemies);
@@ -20,6 +25,13 @@ export function HUD() {
 
   const weaponColor = player.weapon ? RARITY_COLORS[player.weapon.rarity] : "#aaa";
   const armorColor = player.armor ? RARITY_COLORS[player.armor.rarity] : "#555";
+  const controlHint =
+    pointerLockStatus === "locked"
+      ? "MOUSE LOOK ACTIVE • WASD MOVE • ESC RELEASE • CLICK / F / SPACE SHOOT"
+      : pointerLockStatus === "error"
+        ? "MOUSE LOCK UNAVAILABLE • WASD MOVE • F / SPACE SHOOT • TRY A TOP-LEVEL BROWSER"
+        : "CLICK GAME TO FOCUS • WASD MOVE • MOUSE LOOK";
+  const controlHintColor = pointerLockStatus === "error" ? "#ffbb66" : "rgba(255,255,255,0.72)";
 
   return (
     <div
@@ -31,6 +43,21 @@ export function HUD() {
         userSelect: "none",
       }}
     >
+      {/* Prototype label */}
+      <div
+        style={{
+          position: "absolute",
+          top: 16,
+          left: 16,
+          color: "rgba(210,180,230,0.65)",
+          fontSize: 10,
+          letterSpacing: 1.5,
+          textTransform: "uppercase",
+        }}
+      >
+        v0.0.1-alpha
+      </div>
+
       {/* Crosshair */}
       <div
         style={{
@@ -195,19 +222,25 @@ export function HUD() {
         </div>
       )}
 
-      {/* Click to aim instruction */}
+      {/* Camera and movement status */}
       <div
         style={{
           position: "absolute",
           bottom: 80,
           left: "50%",
           transform: "translateX(-50%)",
-          color: "rgba(255,255,255,0.4)",
+          color: controlHintColor,
+          background: "rgba(0,0,0,0.62)",
+          border: pointerLockStatus === "error" ? "1px solid rgba(255,170,80,0.7)" : "1px solid rgba(255,255,255,0.12)",
+          borderRadius: 6,
+          padding: "5px 10px",
           fontSize: 11,
+          textAlign: "center",
+          whiteSpace: "nowrap",
           pointerEvents: "none",
         }}
       >
-        CLICK to aim &bull; WASD to move &bull; CLICK / F / SPACE to shoot
+        {controlHint}
       </div>
     </div>
   );
