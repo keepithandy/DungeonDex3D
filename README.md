@@ -6,9 +6,9 @@ The goal is not to rebuild the entire DungeonDex system in 3D all at once. The g
 
 ## Current Status
 
-Phase 0 source adoption is in progress on `agent/adopt-source-archive`.
+Phase 0 source adoption has landed on `main`.
 
-The application has been adopted from the `dungeonDex-3D.tar.gz` source archive into normal repository paths. The discovered app root was `artifacts/3d-game`, and the source now lives at the repository root.
+The application was adopted from the `dungeonDex-3D.tar.gz` source archive into normal repository paths. The discovered app root was `artifacts/3d-game`, and the source now lives at the repository root.
 
 The adopted stack is:
 
@@ -21,31 +21,38 @@ The adopted stack is:
 
 The app source is visible in `src/`, static assets are in `public/`, and the Vite entry point is `index.html`.
 
-## Commands Discovered In The Adopted Source
+## Standalone Commands
 
-The source archive identifies pnpm as its package manager and defines these scripts:
+The standalone build-restoration branch removes the missing Replit workspace requirements and expects these repository-root commands:
 
 ```powershell
 pnpm install
-$env:PORT = "24982"
-$env:BASE_PATH = "/"
 pnpm run dev
 pnpm run build
 pnpm run typecheck
 ```
 
-`PORT` and `BASE_PATH` are required by `vite.config.ts`; they apply to both `dev` and `build`.
+Optional environment overrides are still supported:
 
-## Current Validation Status
+```powershell
+$env:PORT = "24982"
+$env:BASE_PATH = "/"
+```
 
-The adopted `package.json` is an incomplete extract of a larger Replit/pnpm workspace. `pnpm install` currently stops with `ERR_PNPM_CATALOG_ENTRY_NOT_FOUND_FOR_SPEC`, beginning with `@replit/vite-plugin-cartographer`, because the archive does not contain the workspace catalog.
+If those values are omitted, `vite.config.ts` defaults to port `24982` and base path `/`.
 
-The TypeScript configuration also refers to missing parent-workspace files:
+## Build Restoration Notes
 
-- `../../tsconfig.base.json`
-- `../../lib/api-client-react`
+The source archive originally depended on a larger Replit/pnpm workspace. The standalone restoration removes or replaces these blockers:
 
-Because of those missing workspace pieces, the dev server, build, and typecheck are not green yet. The next patch should make the adopted app self-contained before any gameplay work starts.
+- `catalog:` dependency versions in `package.json`
+- `workspace:*` dependency on `@workspace/api-client-react`
+- `../../tsconfig.base.json` inheritance
+- `../../lib/api-client-react` project reference
+- Replit-only Vite plugins
+- Replit artifact commands that pointed at `artifacts/3d-game`
+
+The next local validation pass should run `pnpm install`, `pnpm run build`, and `pnpm run typecheck` from the repository root before merging the standalone-build branch.
 
 ## Project Goal
 
@@ -140,11 +147,11 @@ Future content should be shaped around readable data:
 - readable issue roadmap
 - clear MVP boundary
 
-## Recommended Next Milestone: Standalone Build Restoration
+## Recommended Next Milestone: Local Build Validation
 
 A strong next milestone would be:
 
-> Make the adopted Vite/React/TypeScript app self-contained from the repository root, then get `pnpm install` and `pnpm run build` green.
+> Run the restored standalone commands from the repository root, fix only build/install/type errors, and keep gameplay untouched.
 
 This milestone should avoid movement, combat, UI redesign, inventory, talents, progression, loot tables, procedural generation, or new gameplay.
 
