@@ -1,8 +1,8 @@
 kind = "web"
 previewPath = "/"
-title = "Dungeon Crawler FPS"
+title = "DungeonDex3D"
 version = "1.0.0"
-id = "artifacts/3d-game"
+id = "dungeondex3d"
 router = "path"
 
 [[integratedSkills]]
@@ -15,11 +15,11 @@ paths = [ "/" ]
 localPort = 24982
 
 [services.development]
-run = "pnpm --filter @workspace/3d-game run dev"
+run = "pnpm run dev"
 
 [services.production]
-build = [ "pnpm", "--filter", "@workspace/3d-game", "run", "build" ]
-publicDir = "artifacts/3d-game/dist/public"
+build = [ "pnpm", "run", "build" ]
+publicDir = "dist/public"
 serve = "static"
 
 [[services.production.rewrites]]
