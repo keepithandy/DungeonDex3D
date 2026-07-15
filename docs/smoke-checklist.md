@@ -1,49 +1,56 @@
-# DungeonDex3D Smoke Checklist
+# DungeonDex3D Phase 1 Graybox Smoke Checklist
 
-Use this checklist after any source-adoption, movement, camera, interaction, or state change.
+Use this manual checklist after a runtime, movement, camera, scene, or interaction change. It records the current 3D slice; it is not a roadmap for new gameplay systems.
 
-## Launch
+## Prerequisites
 
-- App starts without a blank screen.
-- Console has no blocking runtime errors.
-- The README run command still matches the actual project.
+From the repository root, run:
 
-## Scene
+```powershell
+pnpm install
+pnpm run build
+pnpm run typecheck
+pnpm run dev
+```
 
-- A simple room, corridor, or test area appears.
-- The player can identify the playable space.
-- Boundaries are visible or understandable.
+Open the local URL printed by Vite. Keep the browser console visible during the check.
+
+## Launch and Menu
+
+- The app loads without a blank screen or blocking console error.
+- The `DUNGEON CRAWLER` menu and `ENTER DUNGEON` button render.
+- Selecting `ENTER DUNGEON` replaces the menu with the game view.
+
+## Scene Readability
+
+- A bounded square room renders with a floor, walls, ceiling, pillars, and torch lights.
+- The HUD shows the current depth, remaining-enemy status, health, and control hint.
+- At least one visible enemy placeholder appears in the room after the scene starts.
 
 ## Movement and Camera
 
-- Player movement responds to input.
-- Camera remains readable.
-- Player cannot immediately fall out of the test space.
-- Movement does not trap the player on spawn.
+- Click the canvas once to lock mouse look; move the mouse and confirm the camera turns without rolling or flipping.
+- Use `WASD` or arrow keys to move; diagonal movement remains controlled.
+- Walk toward each wall and confirm the player stays inside the room rather than leaving the scene.
+- The player starts in open space and can navigate around the room without getting stuck on spawn.
 
-## Interaction
+## Current Objective and Feedback
 
-- One target, enemy, chest, switch, shrine, or marker is visible.
-- The player can reach or trigger it.
-- Triggering it produces clear feedback.
+- The HUD identifies enemies remaining while enemies are active.
+- Existing attack input (`click`, `F`, or `Space`) remains usable after mouse lock; this check does not assess combat balance.
+- After the current enemies are cleared, the HUD directs the player to the exit portal and a portal is visible at the far wall.
+- Reaching the active portal advances the existing room state without a blank screen or runtime error.
 
-## State and Reset
+## Report
 
-- Prototype state starts from a known default.
-- Reset returns the scene to a clean test state.
-- Any saved state is small and documented.
+Record:
 
-## Performance Sanity
+- browser and viewport used
+- whether the menu, scene, movement, camera, enemy marker, objective, and portal passed
+- any console error, visual obstruction, control issue, or performance concern
+- the exact command that failed, if prerequisites did not pass
 
-- The first scene remains lightweight.
-- No unnecessary large assets are added before the graybox slice works.
-- Frame pacing feels acceptable for a tiny prototype.
+## Scope Guardrails
 
-## Release Habit
-
-Before considering a DungeonDex3D patch stable, record:
-
-- what changed
-- what was tested
-- what intentionally did not change
-- what still blocks the next issue
+- Do not use this smoke pass to add weapons, enemies, loot tables, progression, saves, procedural generation, UI redesign, or combat-balance changes.
+- Keep failures as narrow follow-up issues: launch/build, scene readability, movement/camera, or one existing objective path.
