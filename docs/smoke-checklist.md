@@ -29,10 +29,13 @@ Open the local URL printed by Vite. Keep the browser console visible during the 
 
 ## Movement and Camera
 
-- Click the canvas once to lock mouse look; move the mouse and confirm the camera turns without rolling or flipping.
+- In top-level Chrome, click the canvas once and confirm the HUD changes from `CLICK GAME TO FOCUS` to `MOUSE LOOK ACTIVE`.
+- Move the mouse and confirm the camera turns without rolling or flipping.
 - Use `WASD` or arrow keys to move; diagonal movement remains controlled.
 - Walk toward each wall and confirm the player stays inside the room rather than leaving the scene.
 - The player starts in open space and can navigate around the room without getting stuck on spawn.
+- Press `ESC`; confirm mouse look releases, the HUD returns to `CLICK GAME TO FOCUS`, and keyboard movement remains available.
+- If the browser rejects pointer lock, confirm the HUD shows `MOUSE LOCK UNAVAILABLE` and the app continues without a red console crash.
 
 ## Current Objective and Feedback
 
@@ -49,6 +52,19 @@ Record:
 - whether the menu, scene, movement, camera, enemy marker, objective, and portal passed
 - any console error, visual obstruction, control issue, or performance concern
 - the exact command that failed, if prerequisites did not pass
+
+## Phase 1.1 Camera and Movement Lock
+
+The `v0.0.1-alpha` top-level Chrome smoke should record explicit pass/fail results for:
+
+- menu and `ENTER DUNGEON`
+- visible 3D scene and readable HUD
+- canvas focus and pointer lock
+- mouse look and `ESC` release
+- `WASD` movement and diagonal normalization
+- all four arena boundaries
+- pointer-lock failure messaging, when the browser can reproduce that path
+- absence of red browser-console crashes
 
 ## Scope Guardrails
 
