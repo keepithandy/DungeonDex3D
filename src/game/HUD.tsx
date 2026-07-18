@@ -25,6 +25,12 @@ export function HUD({ pointerLockStatus }: HUDProps) {
 
   const weaponColor = player.weapon ? RARITY_COLORS[player.weapon.rarity] : "#aaa";
   const armorColor = player.armor ? RARITY_COLORS[player.armor.rarity] : "#555";
+  const objective =
+    aliveEnemies > 0
+      ? `DEFEAT ${aliveEnemies} ${aliveEnemies === 1 ? "ENEMY" : "ENEMIES"} • EXIT PORTAL OPENS AFTER FINAL ENEMY`
+      : exitActive
+        ? "ALL ENEMIES DEFEATED • FIND THE EXIT PORTAL"
+        : "LOADING ENCOUNTER...";
   const controlHint =
     pointerLockStatus === "locked"
       ? "MOUSE LOOK ACTIVE • WASD MOVE • ESC RELEASE • CLICK / F / SPACE SHOOT"
@@ -91,7 +97,7 @@ export function HUD({ pointerLockStatus }: HUDProps) {
           DEPTH {depth}
         </div>
         <div style={{ background: "rgba(0,0,0,0.7)", padding: "6px 18px", borderRadius: 8, color: "#ffbb44", fontSize: 15 }}>
-          {aliveEnemies > 0 ? `${aliveEnemies} enemies remaining` : exitActive ? "Find the EXIT PORTAL" : "Loading..."}
+          {objective}
         </div>
         <div style={{ background: "rgba(0,0,0,0.7)", padding: "6px 18px", borderRadius: 8, color: "#88ddff", fontSize: 15 }}>
           KILLS: {totalKills}
