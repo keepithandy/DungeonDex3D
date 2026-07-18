@@ -1,4 +1,9 @@
 import { create } from "zustand";
+import {
+  enqueueNotification,
+  tickNotificationState,
+  type NotificationEntry,
+} from "./notificationQueue.mjs";
 
 export type Rarity = "common" | "uncommon" | "rare" | "epic" | "legendary";
 
@@ -102,6 +107,7 @@ interface GameStore {
   totalKills: number;
   notification: string;
   notificationTimer: number;
+  notificationQueue: NotificationEntry[];
   exitActive: boolean;
 
   setPhase: (phase: GamePhase) => void;
@@ -141,6 +147,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   totalKills: 0,
   notification: "",
   notificationTimer: 0,
+  notificationQueue: [],
   exitActive: false,
 
   setPhase: (phase) => set({ phase }),
@@ -155,6 +162,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       bullets: [],
       killCount: 0,
       totalKills: 0,
+      notification: "",
+      notificationTimer: 0,
+      notificationQueue: [],
       exitActive: false,
     }),
 
@@ -168,6 +178,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       loot: [],
       bullets: [],
       killCount: 0,
+      notification: "",
+      notificationTimer: 0,
+      notificationQueue: [],
       exitActive: false,
       player: {
         ...player,
@@ -206,27 +219,36 @@ export const useGameStore = create<GameStore>((set, get) => ({
         hp = maxHp;
         leveled = true;
       }
+
       return {
         player: { ...s.player, xp, xpToNext, playerLevel, maxHp, hp },
-        notification: leveled ? `LEVEL UP! Now level ${playerLevel}` : s.notification,
-        notificationTimer: leveled ? 3 : s.notificationTimer,
+        ...(leveled
+          ? enqueueNotification(s, `LEVEL UP! Now level ${playerLevel}`, 3)
+          : {
+              notification: s.notification,
+              notificationTimer: s.notificationTimer,
+              notificationQueue: s.notificationQueue,
+            }),
       };
     }),
 
   equipWeapon: (weapon) =>
     set((s) => ({
       player: { ...s.player, weapon },
-      notification: `Equipped ${weapon.name}!`,
-      notificationTimer: 2.5,
+      ...enqueueNotification(s, `Equipped ${weapon.name}!`),
     })),
 
   equipArmor: (armor) =>
     set((s) => {
       const newMaxHp = s.player.maxHp + armor.maxHpBonus;
       return {
-        player: { ...s.player, armor, maxHp: newMaxHp, hp: Math.min(s.player.hp + armor.maxHpBonus, newMaxHp) },
-        notification: `Equipped ${armor.name}!`,
-        notificationTimer: 2.5,
+        player: {
+          ...s.player,
+          armor,
+          maxHp: newMaxHp,
+          hp: Math.min(s.player.hp + armor.maxHpBonus, newMaxHp),
+        },
+        ...enqueueNotification(s, `Equipped ${armor.name}!`),
       };
     }),
 
@@ -272,8 +294,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
         killCount: newKillCount,
         totalKills: newTotalKills,
         exitActive,
-        notification: allDead && enemies.length > 0 ? "All enemies slain! Find the exit portal!" : s.notification,
-        notificationTimer: allDead && enemies.length > 0 ? 3 : s.notificationTimer,
+        ...(allDead && enemies.length > 0
+          ? enqueueNotification(s, "All enemies slain! Find the exit portal!", 3)
+          : {
+              notification: s.notification,
+              notificationTimer: s.notificationTimer,
+              notificationQueue: s.notificationQueue,
+            }),
         player: killedXp > 0 ? (() => {
           let { xp, xpToNext, playerLevel, maxHp, hp } = s.player;
           xp += killedXp;
@@ -300,13 +327,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
   removeBullet: (id) =>
     set((s) => ({ bullets: s.bullets.filter((b) => b.id !== id) })),
 
-  showNotification: (msg) => set({ notification: msg, notificationTimer: 2.5 }),
+  showNotification: (msg) =>
+    set((s) => enqueueNotification(s, msg)),
 
   tickNotification: (dt) =>
-    set((s) => ({
-      notificationTimer: Math.max(0, s.notificationTimer - dt),
-      notification: s.notificationTimer - dt <= 0 ? "" : s.notification,
-    })),
+    set((s) => tickNotificationState(s, dt)),
 
   setExitActive: (v) => set({ exitActive: v }),
 }));
