@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
     "serve": "vite preview --host 0.0.0.0",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "smoke:encounter-clarity": "node scripts/smoke-encounter-clarity.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

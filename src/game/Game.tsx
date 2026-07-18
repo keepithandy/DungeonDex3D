@@ -19,8 +19,27 @@ const KEY_MAP = [
   { name: Controls.right, keys: ["ArrowRight", "KeyD"] },
 ];
 
+const NOTIFICATION_TICK_MS = 100;
+const MAX_NOTIFICATION_TICK_SECONDS = 0.25;
+
 function NotificationTicker() {
   const tickNotification = useGameStore((s) => s.tickNotification);
+
+  useEffect(() => {
+    let previousTime = performance.now();
+    const intervalId = window.setInterval(() => {
+      const currentTime = performance.now();
+      const elapsedSeconds = Math.min(
+        (currentTime - previousTime) / 1000,
+        MAX_NOTIFICATION_TICK_SECONDS,
+      );
+      previousTime = currentTime;
+      tickNotification(elapsedSeconds);
+    }, NOTIFICATION_TICK_MS);
+
+    return () => window.clearInterval(intervalId);
+  }, [tickNotification]);
+
   return null;
 }
 
@@ -61,6 +80,7 @@ export function Game() {
 
   return (
     <div style={{ width: "100vw", height: "100vh", background: "#000", position: "fixed", inset: 0 }}>
+      <NotificationTicker />
       <KeyboardControls map={KEY_MAP}>
         <Canvas
           shadows

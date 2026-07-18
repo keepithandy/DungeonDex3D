@@ -8,6 +8,7 @@ From the repository root, run:
 
 ```powershell
 pnpm install
+pnpm run smoke:encounter-clarity
 pnpm run build
 pnpm run typecheck
 pnpm run dev
@@ -39,10 +40,21 @@ Open the local URL printed by Vite. Keep the browser console visible during the 
 
 ## Current Objective and Feedback
 
-- The HUD identifies enemies remaining while enemies are active.
+- While enemies are active, the HUD explicitly states that the exit portal opens after the final enemy.
 - Existing attack input (`click`, `F`, or `Space`) remains usable after mouse lock; this check does not assess combat balance.
 - After the current enemies are cleared, the HUD directs the player to the exit portal and a portal is visible at the far wall.
 - Reaching the active portal advances the existing room state without a blank screen or runtime error.
+
+## Phase 1.2 Notification Queue
+
+The focused command `pnpm run smoke:encounter-clarity` verifies the deterministic queue transitions. In the running app, also confirm:
+
+- the first notification appears when no message is visible;
+- a second notification waits instead of replacing the current message;
+- the queued message appears after the current duration expires;
+- the notification clears when the queue is empty;
+- rapid loot/equipment feedback does not create overlapping visible messages;
+- leaving the game view clears the single ticker interval without a console warning.
 
 ## Report
 
@@ -50,6 +62,7 @@ Record:
 
 - browser and viewport used
 - whether the menu, scene, movement, camera, enemy marker, objective, and portal passed
+- whether notification order and clearing passed
 - any console error, visual obstruction, control issue, or performance concern
 - the exact command that failed, if prerequisites did not pass
 
@@ -69,4 +82,4 @@ The `v0.0.1-alpha` top-level Chrome smoke should record explicit pass/fail resul
 ## Scope Guardrails
 
 - Do not use this smoke pass to add weapons, enemies, loot tables, progression, saves, procedural generation, UI redesign, or combat-balance changes.
-- Keep failures as narrow follow-up issues: launch/build, scene readability, movement/camera, or one existing objective path.
+- Keep failures as narrow follow-up issues: launch/build, scene readability, movement/camera, notification lifecycle, or one existing objective path.
