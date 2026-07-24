@@ -1,6 +1,6 @@
 import { Canvas } from "@react-three/fiber";
 import { KeyboardControls } from "@react-three/drei";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useGameStore } from "./store";
 import { Arena } from "./Arena";
 import { Player, Controls, type PointerLockStatus } from "./Player";
@@ -11,6 +11,9 @@ import { ExitPortal } from "./ExitPortal";
 import { DeathLootSpawner } from "./DeathLoot";
 import { HUD } from "./HUD";
 import { spawnEnemiesForDepth } from "./monsterSystem";
+import { ErrorBoundary } from "./ErrorBoundary";
+import { SceneResourceFallback } from "./SceneResourceFallback";
+import { loadPreferences } from "./preferences.mjs";
 
 const KEY_MAP = [
   { name: Controls.forward, keys: ["ArrowUp", "KeyW"] },
@@ -45,9 +48,10 @@ function NotificationTicker() {
 
 interface GameSceneProps {
   onPointerLockStatusChange: (status: PointerLockStatus) => void;
+  cameraSensitivity: number;
 }
 
-function GameScene({ onPointerLockStatusChange }: GameSceneProps) {
+function GameScene({ onPointerLockStatusChange, cameraSensitivity }: GameSceneProps) {
   const depth = useGameStore((s) => s.depth);
   const setEnemies = useGameStore((s) => s.setEnemies);
   const setLoot = useGameStore((s) => s.setLoot);
@@ -56,14 +60,14 @@ function GameScene({ onPointerLockStatusChange }: GameSceneProps) {
     const enemies = spawnEnemiesForDepth(depth);
     setEnemies(enemies);
     setLoot([]);
-  }, [depth]);
+  }, [depth, setEnemies, setLoot]);
 
   return (
     <>
       <ambientLight intensity={0.25} color="#334" />
       <directionalLight position={[5, 8, 5]} intensity={0.8} color="#aabbff" castShadow />
       <Arena />
-      <Player onPointerLockStatusChange={onPointerLockStatusChange} />
+      <Player onPointerLockStatusChange={onPointerLockStatusChange} cameraSensitivity={cameraSensitivity} />
       <Enemies />
       <Bullets />
       <LootItems />
@@ -75,26 +79,35 @@ function GameScene({ onPointerLockStatusChange }: GameSceneProps) {
 export function Game() {
   const phase = useGameStore((s) => s.phase);
   const [pointerLockStatus, setPointerLockStatus] = useState<PointerLockStatus>("unlocked");
+  const preferences = useMemo(() => loadPreferences(window.localStorage), []);
 
   if (phase !== "playing") return null;
 
   return (
-    <div style={{ width: "100vw", height: "100vh", background: "#000", position: "fixed", inset: 0 }}>
-      <NotificationTicker />
-      <KeyboardControls map={KEY_MAP}>
-        <Canvas
-          shadows
-          camera={{ fov: 75, near: 0.05, far: 200, position: [0, 1.6, 0] }}
-          gl={{ antialias: true }}
-          style={{ width: "100%", height: "100%" }}
-        >
-          <Suspense fallback={null}>
-            <GameScene onPointerLockStatusChange={setPointerLockStatus} />
-          </Suspense>
-        </Canvas>
-      </KeyboardControls>
-      <DeathLootSpawner />
-      <HUD pointerLockStatus={pointerLockStatus} />
-    </div>
+    <ErrorBoundary>
+      <div
+        data-reduced-motion={preferences.reducedMotion ? "true" : "false"}
+        style={{ width: "100vw", height: "100vh", background: "#000", position: "fixed", inset: 0 }}
+      >
+        <NotificationTicker />
+        <KeyboardControls map={KEY_MAP}>
+          <Canvas
+            shadows
+            camera={{ fov: 75, near: 0.05, far: 200, position: [0, 1.6, 0] }}
+            gl={{ antialias: true }}
+            style={{ width: "100%", height: "100%" }}
+          >
+            <Suspense fallback={<SceneResourceFallback />}>
+              <GameScene
+                onPointerLockStatusChange={setPointerLockStatus}
+                cameraSensitivity={preferences.cameraSensitivity}
+              />
+            </Suspense>
+          </Canvas>
+        </KeyboardControls>
+        <DeathLootSpawner />
+        <HUD pointerLockStatus={pointerLockStatus} />
+      </div>
+    </ErrorBoundary>
   );
 }
