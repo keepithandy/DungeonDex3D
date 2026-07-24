@@ -7,7 +7,7 @@ import { ARENA_BOUNDS } from "./Arena";
 import { clampArenaPosition, normalizeMovementInput } from "./movementModel.mjs";
 
 const MOVE_SPEED = 7;
-const MOUSE_SENSITIVITY = 0.002;
+const BASE_MOUSE_SENSITIVITY = 0.002;
 const PLAYER_HEIGHT = 1.6;
 
 enum Controls {
@@ -21,9 +21,10 @@ export type PointerLockStatus = "unlocked" | "locked" | "error";
 
 interface PlayerProps {
   onPointerLockStatusChange: (status: PointerLockStatus) => void;
+  cameraSensitivity?: number;
 }
 
-export function Player({ onPointerLockStatusChange }: PlayerProps) {
+export function Player({ onPointerLockStatusChange, cameraSensitivity = 1 }: PlayerProps) {
   const { camera, gl } = useThree();
   const [, getKeys] = useKeyboardControls<Controls>();
   const updatePlayer = useGameStore((s) => s.updatePlayer);
@@ -38,6 +39,7 @@ export function Player({ onPointerLockStatusChange }: PlayerProps) {
 
   useEffect(() => {
     const canvas = gl.domElement;
+    const sensitivity = BASE_MOUSE_SENSITIVITY * cameraSensitivity;
 
     const reportPointerLockError = () => {
       isPointerLocked.current = false;
@@ -46,8 +48,8 @@ export function Player({ onPointerLockStatusChange }: PlayerProps) {
 
     const onMouseMove = (e: MouseEvent) => {
       if (!isPointerLocked.current) return;
-      yaw.current -= e.movementX * MOUSE_SENSITIVITY;
-      pitch.current -= e.movementY * MOUSE_SENSITIVITY;
+      yaw.current -= e.movementX * sensitivity;
+      pitch.current -= e.movementY * sensitivity;
       pitch.current = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, pitch.current));
     };
 
@@ -86,7 +88,7 @@ export function Player({ onPointerLockStatusChange }: PlayerProps) {
       document.removeEventListener("pointerlockchange", onPointerLockChange);
       document.removeEventListener("pointerlockerror", reportPointerLockError);
     };
-  }, [gl, onPointerLockStatusChange]);
+  }, [cameraSensitivity, gl, onPointerLockStatusChange]);
 
   const tryShoot = () => {
     const store = useGameStore.getState();
