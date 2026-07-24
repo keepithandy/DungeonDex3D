@@ -4,6 +4,7 @@ import { useKeyboardControls } from "@react-three/drei";
 import * as THREE from "three";
 import { useGameStore } from "./store";
 import { ARENA_BOUNDS } from "./Arena";
+import { clampArenaPosition, normalizeMovementInput } from "./movementModel.mjs";
 
 const MOVE_SPEED = 7;
 const MOUSE_SENSITIVITY = 0.002;
@@ -123,24 +124,22 @@ export function Player({ onPointerLockStatusChange }: PlayerProps) {
     if (phase !== "playing") return;
 
     const keys = getKeys();
-    const euler = new THREE.Euler(0, yaw.current, 0, "YXZ");
     const forward = new THREE.Vector3(-Math.sin(yaw.current), 0, -Math.cos(yaw.current));
     const right = new THREE.Vector3(Math.cos(yaw.current), 0, -Math.sin(yaw.current));
+    const input = normalizeMovementInput(keys.forward, keys.back, keys.left, keys.right);
+    const move = forward.multiplyScalar(-input.z).add(right.multiplyScalar(input.x));
 
-    const move = new THREE.Vector3();
-    if (keys.forward) move.add(forward);
-    if (keys.back) move.sub(forward);
-    if (keys.left) move.sub(right);
-    if (keys.right) move.add(right);
-
-    if (move.length() > 0) {
-      move.normalize().multiplyScalar(MOVE_SPEED * delta);
+    if (move.lengthSq() > 0) {
+      move.multiplyScalar(MOVE_SPEED * delta);
       pos.current.add(move);
     }
 
-    pos.current.x = Math.max(-ARENA_BOUNDS, Math.min(ARENA_BOUNDS, pos.current.x));
-    pos.current.z = Math.max(-ARENA_BOUNDS, Math.min(ARENA_BOUNDS, pos.current.z));
-    pos.current.y = PLAYER_HEIGHT;
+    const [x, y, z] = clampArenaPosition(
+      [pos.current.x, pos.current.y, pos.current.z],
+      ARENA_BOUNDS,
+      PLAYER_HEIGHT,
+    );
+    pos.current.set(x, y, z);
 
     camera.position.copy(pos.current);
     camera.rotation.set(pitch.current, yaw.current, 0, "YXZ");
