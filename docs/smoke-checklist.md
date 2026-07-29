@@ -1,85 +1,85 @@
-# DungeonDex3D Phase 1 Graybox Smoke Checklist
+# DungeonDex3D v0.0.1-alpha Validation Checklist
 
-Use this manual checklist after a runtime, movement, camera, scene, or interaction change. It records the current 3D slice; it is not a roadmap for new gameplay systems.
+Use this checklist after runtime, movement, camera, scene, HUD, preference, or interaction changes. It validates the existing alpha slice; it does not authorize new gameplay systems.
 
-## Prerequisites
+## Automated prerequisites
 
 From the repository root, run:
 
 ```powershell
 pnpm install
-pnpm run smoke:encounter-clarity
-pnpm run build
-pnpm run typecheck
+pnpm run validate
 pnpm run dev
 ```
 
-Open the local URL printed by Vite. Keep the browser console visible during the check.
+`pnpm run validate` runs both smoke suites, TypeScript, and the production build. GitHub Actions runs the same checks on pull requests and pushes to `main`.
 
-## Launch and Menu
+## Browser matrix
+
+| Environment | Expected status | Required checks |
+| --- | --- | --- |
+| Current Chrome or Edge, top-level tab | Primary supported alpha path | Full checklist, pointer lock, reload, console |
+| Current Firefox, top-level tab | Secondary check | Launch, movement, fallback messaging, console |
+| Safari/macOS | Best-effort alpha check | Launch, scene, keyboard input, pointer-lock behavior note |
+| Embedded preview/frame | Known-limited | Keyboard movement must continue; pointer lock may be blocked and must show a readable warning |
+| Mobile portrait/landscape | HUD-fit check only | No overlap or horizontal clipping; no claim of touch gameplay support |
+
+## Launch and resources
 
 - The app loads without a blank screen or blocking console error.
-- The `DUNGEON CRAWLER` menu and `ENTER DUNGEON` button render.
-- Selecting `ENTER DUNGEON` replaces the menu with the game view.
+- `ENTER DUNGEON` replaces the menu with the game view.
+- The bounded arena, enemies, HUD, and current objective render.
+- A delayed optional resource shows the wireframe scene fallback instead of a blank canvas.
+- A fatal scene error shows `SCENE COULD NOT LOAD`, the error message, and a reload action.
+- No current alpha path depends on remote models, textures, audio, APIs, credentials, or private assets.
 
-## Scene Readability
+## Movement and pointer lock
 
-- A bounded square room renders with a floor, walls, ceiling, pillars, and torch lights.
-- The HUD shows the current depth, remaining-enemy status, health, and control hint.
-- At least one visible enemy placeholder appears in the room after the scene starts.
+- Click the canvas in a top-level browser; the HUD changes from `CLICK GAME TO FOCUS` to `MOUSE LOOK ACTIVE`.
+- Move with `WASD` or arrow keys; diagonal travel is not faster than cardinal travel.
+- Walk toward all four walls; the player remains inside the documented arena bounds.
+- The player starts at `[0, 1, 0]` in open space.
+- Press `ESC`; pointer lock releases and the focus hint returns.
+- If pointer lock is denied or unavailable, the HUD shows `MOUSE LOCK UNAVAILABLE`, keyboard movement continues, and no red console crash appears.
 
-## Movement and Camera
+## Encounter and reset
 
-- In top-level Chrome, click the canvas once and confirm the HUD changes from `CLICK GAME TO FOCUS` to `MOUSE LOOK ACTIVE`.
-- Move the mouse and confirm the camera turns without rolling or flipping.
-- Use `WASD` or arrow keys to move; diagonal movement remains controlled.
-- Walk toward each wall and confirm the player stays inside the room rather than leaving the scene.
-- The player starts in open space and can navigate around the room without getting stuck on spawn.
-- Press `ESC`; confirm mouse look releases, the HUD returns to `CLICK GAME TO FOCUS`, and keyboard movement remains available.
-- If the browser rejects pointer lock, confirm the HUD shows `MOUSE LOCK UNAVAILABLE` and the app continues without a red console crash.
+- While enemies remain, the HUD states that the portal opens after the final enemy.
+- Existing click, `F`, and `Space` attack inputs remain available.
+- Clearing the room activates the exit objective and portal.
+- Entering the portal clears enemies, loot, bullets, room kill count, exit state, and pending notifications.
+- The next depth respawns the player at `[0, 1, 0]` with yaw and pitch reset.
+- Existing equipment, player level, and total kills persist across the depth transition.
+- Repeat the transition twice to detect stale encounter state.
 
-## Current Objective and Feedback
+## Notification queue
 
-- While enemies are active, the HUD explicitly states that the exit portal opens after the final enemy.
-- Existing attack input (`click`, `F`, or `Space`) remains usable after mouse lock; this check does not assess combat balance.
-- After the current enemies are cleared, the HUD directs the player to the exit portal and a portal is visible at the far wall.
-- Reaching the active portal advances the existing room state without a blank screen or runtime error.
+- The first message appears immediately.
+- Rapid second and third messages retain order instead of overwriting one another.
+- Mixed message durations advance correctly.
+- Blank or whitespace messages are ignored.
+- Starting a new game or entering a new depth clears stale queued messages.
+- Leaving the game view clears the ticker interval without a console warning.
 
-## Phase 1.2 Notification Queue
+## HUD and preferences
 
-The focused command `pnpm run smoke:encounter-clarity` verifies the deterministic queue transitions. In the running app, also confirm:
+- At 320×568, 390×844, 844×390, and a short desktop window, objective, health, equipment, notification, and controls do not overlap or force horizontal scrolling.
+- Long objective and notification text wraps safely.
+- Safe-area insets are respected where supported.
+- Camera sensitivity is bounded to 0.5–2.0 with a default of 1.0.
+- Malformed local preference data repairs to safe defaults.
+- Reduced-motion preference disables or minimizes nonessential HUD/loot motion; it does not change gameplay timing.
+- Only `dungeondex3d.preferences.v1` display/control preferences are stored locally.
 
-- the first notification appears when no message is visible;
-- a second notification waits instead of replacing the current message;
-- the queued message appears after the current duration expires;
-- the notification clears when the queue is empty;
-- rapid loot/equipment feedback does not create overlapping visible messages;
-- leaving the game view clears the single ticker interval without a console warning.
+## Release artifact and labels
 
-## Report
+- `package.json` version remains `0.0.1-alpha`.
+- Menu, HUD, README, and release notes retain explicit alpha/prototype wording.
+- `dist/` is produced by `pnpm run build` and contains the browser entry and bundled static assets.
+- No source archives, local saves, environment files, credentials, or development-only logs are included in a release artifact.
+- Record the final commit SHA, validation workflow result, browser/viewport, and any known limitations.
 
-Record:
+## Scope guardrails
 
-- browser and viewport used
-- whether the menu, scene, movement, camera, enemy marker, objective, and portal passed
-- whether notification order and clearing passed
-- any console error, visual obstruction, control issue, or performance concern
-- the exact command that failed, if prerequisites did not pass
-
-## Phase 1.1 Camera and Movement Lock
-
-The `v0.0.1-alpha` top-level Chrome smoke should record explicit pass/fail results for:
-
-- menu and `ENTER DUNGEON`
-- visible 3D scene and readable HUD
-- canvas focus and pointer lock
-- mouse look and `ESC` release
-- `WASD` movement and diagonal normalization
-- all four arena boundaries
-- pointer-lock failure messaging, when the browser can reproduce that path
-- absence of red browser-console crashes
-
-## Scope Guardrails
-
-- Do not use this smoke pass to add weapons, enemies, loot tables, progression, saves, procedural generation, UI redesign, or combat-balance changes.
-- Keep failures as narrow follow-up issues: launch/build, scene readability, movement/camera, notification lifecycle, or one existing objective path.
+- Do not add weapons, enemies, loot tables, progression, saves, procedural generation, content packs, or combat-balance changes during this validation pass.
+- Failures become narrow follow-up issues only when they cannot be resolved inside the existing alpha-hardening scope.

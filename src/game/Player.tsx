@@ -4,9 +4,10 @@ import { useKeyboardControls } from "@react-three/drei";
 import * as THREE from "three";
 import { useGameStore } from "./store";
 import { ARENA_BOUNDS } from "./Arena";
+import { clampArenaPosition, normalizeMovementInput } from "./movementModel.mjs";
 
 const MOVE_SPEED = 7;
-const MOUSE_SENSITIVITY = 0.002;
+const BASE_MOUSE_SENSITIVITY = 0.002;
 const PLAYER_HEIGHT = 1.6;
 
 enum Controls {
@@ -20,9 +21,10 @@ export type PointerLockStatus = "unlocked" | "locked" | "error";
 
 interface PlayerProps {
   onPointerLockStatusChange: (status: PointerLockStatus) => void;
+  cameraSensitivity?: number;
 }
 
-export function Player({ onPointerLockStatusChange }: PlayerProps) {
+export function Player({ onPointerLockStatusChange, cameraSensitivity = 1 }: PlayerProps) {
   const { camera, gl } = useThree();
   const [, getKeys] = useKeyboardControls<Controls>();
   const updatePlayer = useGameStore((s) => s.updatePlayer);
@@ -37,6 +39,7 @@ export function Player({ onPointerLockStatusChange }: PlayerProps) {
 
   useEffect(() => {
     const canvas = gl.domElement;
+    const sensitivity = BASE_MOUSE_SENSITIVITY * cameraSensitivity;
 
     const reportPointerLockError = () => {
       isPointerLocked.current = false;
@@ -45,8 +48,8 @@ export function Player({ onPointerLockStatusChange }: PlayerProps) {
 
     const onMouseMove = (e: MouseEvent) => {
       if (!isPointerLocked.current) return;
-      yaw.current -= e.movementX * MOUSE_SENSITIVITY;
-      pitch.current -= e.movementY * MOUSE_SENSITIVITY;
+      yaw.current -= e.movementX * sensitivity;
+      pitch.current -= e.movementY * sensitivity;
       pitch.current = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, pitch.current));
     };
 
@@ -85,7 +88,7 @@ export function Player({ onPointerLockStatusChange }: PlayerProps) {
       document.removeEventListener("pointerlockchange", onPointerLockChange);
       document.removeEventListener("pointerlockerror", reportPointerLockError);
     };
-  }, [gl, onPointerLockStatusChange]);
+  }, [cameraSensitivity, gl, onPointerLockStatusChange]);
 
   const tryShoot = () => {
     const store = useGameStore.getState();
@@ -123,24 +126,22 @@ export function Player({ onPointerLockStatusChange }: PlayerProps) {
     if (phase !== "playing") return;
 
     const keys = getKeys();
-    const euler = new THREE.Euler(0, yaw.current, 0, "YXZ");
     const forward = new THREE.Vector3(-Math.sin(yaw.current), 0, -Math.cos(yaw.current));
     const right = new THREE.Vector3(Math.cos(yaw.current), 0, -Math.sin(yaw.current));
+    const input = normalizeMovementInput(keys.forward, keys.back, keys.left, keys.right);
+    const move = forward.multiplyScalar(-input.z).add(right.multiplyScalar(input.x));
 
-    const move = new THREE.Vector3();
-    if (keys.forward) move.add(forward);
-    if (keys.back) move.sub(forward);
-    if (keys.left) move.sub(right);
-    if (keys.right) move.add(right);
-
-    if (move.length() > 0) {
-      move.normalize().multiplyScalar(MOVE_SPEED * delta);
+    if (move.lengthSq() > 0) {
+      move.multiplyScalar(MOVE_SPEED * delta);
       pos.current.add(move);
     }
 
-    pos.current.x = Math.max(-ARENA_BOUNDS, Math.min(ARENA_BOUNDS, pos.current.x));
-    pos.current.z = Math.max(-ARENA_BOUNDS, Math.min(ARENA_BOUNDS, pos.current.z));
-    pos.current.y = PLAYER_HEIGHT;
+    const [x, y, z] = clampArenaPosition(
+      [pos.current.x, pos.current.y, pos.current.z],
+      ARENA_BOUNDS,
+      PLAYER_HEIGHT,
+    );
+    pos.current.set(x, y, z);
 
     camera.position.copy(pos.current);
     camera.rotation.set(pitch.current, yaw.current, 0, "YXZ");
